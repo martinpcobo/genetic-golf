@@ -124,7 +124,7 @@ function setCourse() {
 	target = createVector(width - 70, height / 2);
 	pits = []; // Reiniciar pits en cada llamada para evitar duplicación
 
-	let numPits = floor(random(20, 30)); // Número de pits aleatorio entre 20 y 30
+	let numPits = floor(random(10, 20)); // Número de pits aleatorio entre 20 y 30
 	let minDistanceFromTarget = 150; // Distancia mínima al objetivo
 
 	for (let i = 0; i < numPits; i++) {
