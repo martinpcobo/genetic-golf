@@ -44,7 +44,7 @@ class Golfball {
 			}
 		}
 
-		//If you hit a sandpit your speed is slowed by 10% until you hit 0.
+		 // Si golpeas un búnker tu velocidad se reduce en un 10% hasta que llegues a 0.
 		if (this.slowed) {
 			this.vel.div(1.1);
 			this.pos.add(this.vel);

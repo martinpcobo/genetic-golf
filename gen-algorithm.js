@@ -12,7 +12,7 @@ let speedMultiplier = 10; // Factor de velocidad para aumentar el movimiento
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 
-	// Add starting set of golfballs.
+	// Agregar el conjunto inicial de golfballs.
 	for (let i = 0; i < agents; i++) {
 		let golfball = new Golfball();
 		golfballs.push(golfball);
@@ -37,7 +37,7 @@ function runGeneration() {
 	for (let golfball of golfballs) {
 		golfball.show();
 		if (!golfball.finished) {
-			let shotIndex = Math.floor(counter / (lifespan / numShots)); // calcula el índice del tiro
+			let shotIndex = Math.floor(counter / (lifespan / numShots)); // Calcula el índice del tiro
 			let force = p5.Vector.mult(
 				golfball.dna[shotIndex],
 				speedMultiplier
@@ -124,7 +124,7 @@ function setCourse() {
 	target = createVector(width - 70, height / 2);
 	pits = []; // Reiniciar pits en cada llamada para evitar duplicación
 
-	let numPits = floor(random(20, 30)); // Número de pits aleatorio entre 5 y 10
+	let numPits = floor(random(20, 30)); // Número de pits aleatorio entre 20 y 30
 	let minDistanceFromTarget = 150; // Distancia mínima al objetivo
 
 	for (let i = 0; i < numPits; i++) {
@@ -147,14 +147,14 @@ function setCourse() {
 function getCourse() {
 	background(93, 140, 60);
 
-	// Fairway green background layer
+	// Capa de fondo verde del fairway
 	push();
 	noStroke();
 	fill(78, 173, 10);
 	rect(25, 25, width - 50, height - 50);
 	pop();
 
-	// Diagonal stripes on fairway
+	// Rayas diagonales en el fairway
 	push();
 	translate(width / 2, height / 2);
 	rotate(45);
@@ -168,7 +168,7 @@ function getCourse() {
 	}
 	pop();
 
-	// Beveled Corners
+	// Esquinas biseladas
 	push();
 	noFill();
 	stroke(93, 140, 60);
@@ -176,7 +176,7 @@ function getCourse() {
 	rect(12, 12, width - 25, height - 25, 55);
 	pop();
 
-	// Outermost framing layer
+	// Capa de enmarcado más externa
 	push();
 	noStroke();
 	fill(93, 140, 60);
@@ -186,7 +186,7 @@ function getCourse() {
 	rect(0, height - 25, width, 25);
 	pop();
 
-	// Tee box and blue tee markers
+	// Tee box y marcadores de tee azules
 	push();
 	noStroke();
 	fill(138, 219, 81);
@@ -196,7 +196,7 @@ function getCourse() {
 	ellipse(65, height / 2 + 20, 6);
 	pop();
 
-	// Putting green, hole, and flag
+	// Green de putting, hoyo y bandera
 	push();
 	strokeWeight(8);
 	stroke(77, 153, 23);
@@ -220,7 +220,7 @@ function getCourse() {
 	);
 	pop();
 
-	// Sand pits - asegúrate de que coincidan con el área de colisión
+	// Pits de arena
 	push();
 	noStroke();
 	rectMode(CENTER);
@@ -230,7 +230,7 @@ function getCourse() {
 	}
 	pop();
 
-	// Course text
+	// Texto del campo
 	push();
 	textSize(20);
 	noStroke();
@@ -249,7 +249,7 @@ function displayInfo() {
 
 	let finishedIndividuals = golfballs.filter((g) => g.finished).length;
 
-	let infoText = `Current Generation: ${generations} | Population: ${agents} | Active Individuals: ${activeIndividuals} | Finished Individuals: ${finishedIndividuals} | Speed Multiplier: ${speedMultiplier} | Lifespan Remaining: ${
+	let infoText = `Generación Actual: ${generations} | Población: ${agents} | Individuos Activos: ${activeIndividuals} | Individuos Terminados: ${finishedIndividuals} | Multiplicador de Velocidad: ${speedMultiplier} | Tiempo de Vida Restante: ${
 		lifespan - counter
 	}`;
 
