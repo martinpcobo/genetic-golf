@@ -1,13 +1,13 @@
 let target;
 let counter = 0;
-let lifespan = 300;
-let agents = 600;
+let lifespan = 500;
+let agents = 500;
 let generations = 1;
 let golfballs = [];
 let matingpool = [];
 let pits = [];
 let numShots = 15; // Número de tiros por cada golfball
-let speedMultiplier = 8; // Factor de velocidad para aumentar el movimiento
+let speedMultiplier = 10; // Factor de velocidad para aumentar el movimiento
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
@@ -24,7 +24,10 @@ function setup() {
 function draw() {
 	getCourse();
 	runGeneration();
-	if (counter == lifespan) {
+	let activeIndividuals = golfballs.filter(
+		(g) => !g.stopped && !g.finished && !g.slowed
+	).length;
+	if (counter == lifespan || activeIndividuals == 0) {
 		newGeneration();
 	}
 }
@@ -101,7 +104,6 @@ function naturalSelection() {
 function normalizeData() {
 	let highestFit = 0;
 	let lowestFit = Infinity;
-	let lowestTime = Infinity;
 
 	for (let golfball of golfballs) {
 		if (golfball.fitness > highestFit) {
@@ -110,30 +112,11 @@ function normalizeData() {
 		if (golfball.fitness < lowestFit) {
 			lowestFit = golfball.fitness;
 		}
-		if (golfball.finished && golfball.time < lowestTime) {
-			lowestTime = golfball.time;
-		}
 	}
 
 	for (let golfball of golfballs) {
-		golfball.fitness = map(golfball.fitness, lowestFit, highestFit, 7, 0);
-		golfball.fitness = pow(2, golfball.fitness);
-
-		if (golfball.finished) {
-			golfball.fitness *= 2;
-		}
-		if (golfball.time == lowestTime && generations > 15) {
-			golfball.fitness *= 5;
-		}
-		if (golfball.time == lowestTime && generations > 50) {
-			golfball.fitness *= 20;
-		}
-		if (golfball.stopped) {
-			golfball.fitness = 1;
-		}
-		if (golfball.slowed) {
-			golfball.fitness *= 0.5;
-		}
+		// Normalizar fitness para que los mejores tengan valores altos
+		golfball.fitness = map(golfball.fitness, lowestFit, highestFit, 1, 10);
 	}
 }
 
@@ -141,7 +124,7 @@ function setCourse() {
 	target = createVector(width - 70, height / 2);
 	pits = []; // Reiniciar pits en cada llamada para evitar duplicación
 
-	let numPits = floor(random(5, 11)); // Número de pits aleatorio entre 5 y 10
+	let numPits = floor(random(20, 30)); // Número de pits aleatorio entre 5 y 10
 	let minDistanceFromTarget = 150; // Distancia mínima al objetivo
 
 	for (let i = 0; i < numPits; i++) {
@@ -222,7 +205,7 @@ function getCourse() {
 	noStroke();
 	strokeWeight(3);
 	fill(0);
-	ellipse(width - 70, height / 2, 14);
+	ellipse(width - 70, height / 2, 30);
 	stroke(255);
 	line(width - 70, height / 2, width - 70, height / 2 - 40);
 	noStroke();
@@ -261,10 +244,14 @@ function displayInfo() {
 	textAlign(CENTER, BOTTOM); // Alinea el texto al centro
 
 	let activeIndividuals = golfballs.filter(
-		(g) => !g.stopped && !g.finished
+		(g) => !g.stopped && !g.finished && !g.slowed
 	).length;
 
-	let infoText = `Current Generation: ${generations} | Population: ${agents} | Active Individuals: ${activeIndividuals} | Speed Multiplier: ${speedMultiplier}`;
+	let finishedIndividuals = golfballs.filter((g) => g.finished).length;
+
+	let infoText = `Current Generation: ${generations} | Population: ${agents} | Active Individuals: ${activeIndividuals} | Finished Individuals: ${finishedIndividuals} | Speed Multiplier: ${speedMultiplier} | Lifespan Remaining: ${
+		lifespan - counter
+	}`;
 
 	// Muestra el texto horizontalmente centrado en la parte inferior de la pantalla
 	text(infoText, width / 2, height - 5);

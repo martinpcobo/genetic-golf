@@ -28,16 +28,20 @@ class Golfball {
 
 	applyForce(force) {
 		if (!this.slowed) {
-			this.acc.add(force);
-			this.vel.add(this.acc);
+			this.vel = force.copy();
 			this.acc.mult(0);
 		}
 	}
 
 	update() {
+		// Actualizar posición usando la velocidad
 		if (!this.stopped && !this.slowed) {
-			this.vel.limit(4);
 			this.pos.add(this.vel);
+
+			// Detener si la velocidad mínima se mantiene
+			if (this.vel.mag() < 0.5 && counter > 20) {
+				this.stopped = true;
+			}
 		}
 
 		//If you hit a sandpit your speed is slowed by 10% until you hit 0.
@@ -46,7 +50,7 @@ class Golfball {
 			this.pos.add(this.vel);
 		}
 
-		//Edge of the window check
+		// Verificar si sale de la pantalla
 		if (
 			this.pos.x < 0 ||
 			this.pos.y < 0 ||
@@ -67,15 +71,33 @@ class Golfball {
 
 	completed(x, y) {
 		let d = dist(this.pos.x, this.pos.y, x, y);
-		if (d < this.radius / 2) {
+		if (d < 30 / 2) {
 			this.finished = true;
 			this.time = counter;
 		}
 	}
 
 	calcFitness(hx, hy) {
-		let d = floor(dist(this.pos.x, this.pos.y, hx, hy));
-		return d;
+		// (1) Distancia de la pelota al agujero
+		let distance = dist(this.pos.x, this.pos.y, hx, hy);
+		this.fitness = 1 / (distance + 1); // Invertir la distancia para que una menor distancia tenga un mayor fitness
+
+		if (this.finished) {
+			// (2) Gran recompensa por terminar con éxito
+			this.fitness *= 10;
+		} else {
+			// (3) Penalización si la pelota se queda en la arena
+			if (this.slowed) {
+				this.fitness *= 0.5;
+			}
+
+			// (4) Penalización por salir de la cancha
+			if (this.stopped && (this.pos.x < 0 || this.pos.x > width || this.pos.y < 0 || this.pos.y > height)) {
+				this.fitness *= 0.1;
+			}
+		}
+
+		return this.fitness;
 	}
 
 	breed(coParent) {
@@ -115,6 +137,73 @@ class Golfball {
 		return childDNA;
 	}
 }
+
+function normalizeData() {
+    let highestFit = 0;
+    let lowestFit = Infinity;
+
+    for (let golfball of golfballs) {
+        if (golfball.fitness > highestFit) {
+            highestFit = golfball.fitness;
+        }
+        if (golfball.fitness < lowestFit) {
+            lowestFit = golfball.fitness;
+        }
+    }
+
+    for (let golfball of golfballs) {
+        golfball.fitness = map(golfball.fitness, lowestFit, highestFit, 0, 1);
+    }
+}
+
+function naturalSelection() {
+    matingpool = [];
+
+    for (let golfball of golfballs) {
+        let n = golfball.fitness * 100;
+        for (let j = 0; j < n; j++) {
+            matingpool.push(golfball);
+        }
+    }
+}
+
+function newGeneration() {
+    console.log('Creating a new generation...');
+
+    // Calcular la aptitud de cada golfball
+    for (let i = 0; i < golfballs.length; i++) {
+        golfballs[i].fitness = golfballs[i].calcFitness(width - 70, height / 2);
+    }
+
+    // Normalizar y seleccionar individuos para la próxima generación
+    normalizeData();
+    naturalSelection();
+    golfballs = [];
+
+    // Crear una nueva generación de golfballs a partir del mating pool
+    for (let i = 0; i < agents; i++) {
+        let parentA = random(matingpool);
+        let parentB = random(matingpool);
+        while (parentA == parentB) {
+            parentB = random(matingpool);
+        }
+        golfballs.push(new Golfball(parentA.breed(parentB)));
+    }
+
+    // Mutar el DNA de cada golfball
+    for (let i = 0; i < golfballs.length; i++) {
+        for (let j = 0; j < golfballs[i].dna.length; j++) {
+            let r = random();
+            if (r < 0.01) {
+                let newDNA = createVector(random(-1, 1), random(-1, 1));
+                golfballs[i].dna[j] = newDNA;
+            }
+        }
+    }
+    generations++;
+    counter = 0;
+}
+
 /*
 
 class Golfball {
